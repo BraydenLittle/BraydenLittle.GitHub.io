@@ -68,15 +68,15 @@
         }
 
         /* Canvas for Erasable Overlay */
-        #erasable-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(200, 200, 200, 0.9);
-            pointer-events: none;
-        }
+       #erasable-overlay {
+        position: fixed; /* Cover entire viewport */
+        top: 0;
+        left: 0;
+        width: 100vw; /* Full viewport width */
+        height: 100vh; /* Full viewport height */
+        background-color: rgba(200, 200, 200, 0.9);
+        pointer-events: auto; /* Allow mouse events */
+    }
 
         #erasable-overlay-text {
             font-family: monospace;
@@ -141,26 +141,26 @@
             });
 
             // Erasable overlay effect setup
-            const canvas = document.getElementById('erasable-overlay');
-            const ctx = canvas.getContext('2d');
-            canvas.width = passwordPopup.clientWidth;
-            canvas.height = passwordPopup.clientHeight;
+             const canvas = document.getElementById('erasable-overlay');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; // Full viewport width
+        canvas.height = window.innerHeight; // Full viewport height
 
-            // Draw initial overlay
-            ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Draw initial overlay
+        ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Eraser effect
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, 30, 0, 2 * Math.PI);
-                ctx.fill();
-            });
+        // Eraser effect
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, 2 * Math.PI);
+            ctx.fill();
         });
+    });
     </script>
 
 </body>
