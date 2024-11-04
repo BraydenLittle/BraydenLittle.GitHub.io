@@ -142,6 +142,7 @@
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         #password-popup h2 {
@@ -163,8 +164,12 @@
             color: white;
             border: none;
             border-radius: 5px;
+            outline: none;
         }
 
+        #password-submit:focus {
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -197,7 +202,6 @@
     <div class="container">
         <!-- Resume Content Section (Two Columns) -->
         <div class="main-content">
-
             <!-- Left Column (Skills) -->
             <div class="column-left">
                 <div class="section skills">
@@ -225,52 +229,14 @@
 
                 <div class="section experience">
                     <h3>Volunteer Experience</h3>
-                    <div class="experience-item">
-                        <p><strong>RSPCA O'Halloran Hill</strong> - Intake Office & Data Entry (August 2024 - Present)</p>
-                        <ul>
-                            <li>Checking in animal foster carers for surgery and checkups</li>
-                            <li>Informing other teams of animal arrivals via radio</li>
-                            <li>Filling out online animal registration profiles</li>
-                            <li>Running reports, cross-checking, and correcting information within online databases</li>
-                            <li>Electronic doorman duties</li>
-                        </ul>
-                    </div>
-
-                    <div class="experience-item">
-                        <p><strong>RSPCA O'Halloran Hill</strong> - Cat Adoptions & Care (January 2024 - Present)</p>
-                        <ul>
-                            <li>Feeding routines: Catering to each cat's specific dietary requirements</li>
-                            <li>Cleaning: Washing cat pens, floors, dishes, and toys</li>
-                            <li>Adoption: Offering assistance to members of the public regarding any questions or cat suggestions</li>
-                            <li>Cat TLC: Ensuring positive human experiences and socialisation</li>
-                        </ul>
-                    </div>
-
-                    <div class="experience-item">
-                        <p><strong>Adelaide Showgrounds</strong> - Supanova Expo (November 2018)</p>
-                        <ul>
-                            <li>Front-of-house Operations: Ensuring smooth service for guests and addressing any queries</li>
-                            <li>Bump-in and Bump-out: Setting up and taking apart stalls, event displays, and transport unloading/loading</li>
-                            <li>Ushering: Guiding guests to their seats and managing queues</li>
-                        </ul>
-                    </div>
-
-                    <div class="experience-item">
-                        <p><strong>Sydney Convention Centre</strong> - RTX Rooster Teeth Expo (February 2017)</p>
-                        <ul>
-                            <li>Guest Services: Facilitating patron seating and line management for panels and signings</li>
-                            <li>Event Setup: Constructing partner stands and placing signage</li>
-                            <li>Support: Performed various errands to support staff and volunteers</li>
-                        </ul>
-                    </div>
+                    <!-- Experience Details -->
                 </div>
 
                 <div class="section references">
                     <h3>References</h3>
-                    <p><strong>RSPCA O'Halloran Hill</strong> - Kim McLean (Cat Adoption Support)</p>
+                    <!-- Reference Details -->
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -279,11 +245,29 @@
             const passwordOverlay = document.getElementById('password-overlay');
             const passwordInput = document.getElementById('password-input');
             const passwordSubmit = document.getElementById('password-submit');
-
-            // Set password requirement (password is "w")
             const correctPassword = "w";
 
-            // Add event listener to the submit button
-            passwordSubmit.addEventListener('click', function () {
+            function checkPassword() {
                 const enteredPassword = passwordInput.value;
-                if (enteredPassword === correctPassword)
+                if (enteredPassword === correctPassword) {
+                    passwordOverlay.style.display = 'none';
+                } else {
+                    alert('Incorrect password!');
+                    passwordInput.value = '';  // Clear input for retry
+                }
+            }
+
+            // Submit button click
+            passwordSubmit.addEventListener('click', checkPassword);
+
+            // "Enter" key press
+            passwordInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
