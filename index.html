@@ -14,12 +14,7 @@
             padding: 0;
         }
 
-        /* General styles */
-        nav, header, .container {
-            display: none; /* Hide main content until password is entered */
-        }
-
-        /* Password overlay */
+        /* Password overlay styles */
         #password-overlay {
             position: fixed;
             top: 0;
@@ -72,7 +67,7 @@
             margin-top: 10px;
         }
 
-        /* Erasable overlay */
+        /* Canvas for Erasable Overlay */
         #erasable-overlay {
             position: absolute;
             top: 0;
@@ -80,21 +75,19 @@
             width: 100%;
             height: 100%;
             background-color: rgba(200, 200, 200, 0.9);
-            font-size: 5em;
-            color: #666;
-            text-align: center;
-            line-height: 1.5;
             pointer-events: none;
         }
 
-        #erasable-overlay p {
+        #erasable-overlay-text {
+            font-family: monospace;
+            font-size: 3em;
+            color: #666;
+            text-align: center;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             white-space: pre;
-            font-family: monospace;
-            text-align: center;
         }
 
     </style>
@@ -108,16 +101,16 @@
             <input type="password" id="password-input" placeholder="&#128373Password?">
             <button id="password-submit">Submit</button>
 
-            <!-- Grey overlay with erasable effect -->
+            <!-- Erasable overlay with question mark -->
             <canvas id="erasable-overlay"></canvas>
-            <p id="question-mark">
-                ###########################\n
-                ##########    ##########\n
-                ##########    ##########\n
-                ##########    ##########\n
-                ##########    ##########\n
-                ###########################\n
-            </p>
+            <div id="erasable-overlay-text">
+                ###
+                # #
+                 #
+                 #
+                 #
+                ###
+            </div>
         </div>
     </div>
 
@@ -127,46 +120,35 @@
             const passwordPopup = document.getElementById('password-popup');
             const passwordInput = document.getElementById('password-input');
             const passwordSubmit = document.getElementById('password-submit');
-            const correctPassword = "w"; //<--- ignore this ;)
+            const correctPassword = "w";
 
-            // Password check function
             function checkPassword() {
                 const enteredPassword = passwordInput.value;
                 if (enteredPassword === correctPassword) {
                     passwordOverlay.style.display = 'none';
-                    document.querySelector('nav').style.display = 'block';
-                    document.querySelector('header').style.display = 'block';
-                    document.querySelector('.container').style.display = 'block';
                 } else {
                     alert('Incorrect password!');
-                    passwordInput.value = '';  // Clear input for retry
+                    passwordInput.value = '';
                 }
             }
 
-            // Submit button click
             passwordSubmit.addEventListener('click', checkPassword);
 
-            // "Enter" key press
             passwordInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     checkPassword();
                 }
             });
 
-            // Erasable overlay effect
+            // Erasable overlay effect setup
             const canvas = document.getElementById('erasable-overlay');
             const ctx = canvas.getContext('2d');
             canvas.width = passwordPopup.clientWidth;
             canvas.height = passwordPopup.clientHeight;
 
-            // Draw initial overlay with question mark text art
+            // Draw initial overlay
             ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '5em monospace';
-            ctx.fillStyle = '#666';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('?', canvas.width / 2, canvas.height / 2);
 
             // Eraser effect
             canvas.addEventListener('mousemove', (e) => {
@@ -175,7 +157,7 @@
                 const y = e.clientY - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 20, 0, 2 * Math.PI); // Eraser radius ~2.5x cursor
+                ctx.arc(x, y, 30, 0, 2 * Math.PI);
                 ctx.fill();
             });
         });
