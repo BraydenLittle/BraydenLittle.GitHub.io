@@ -40,10 +40,6 @@
             box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
         }
 
-        #password-popup h2 {
-            margin-bottom: 20px;
-        }
-
         #password-input {
             padding: 10px;
             font-size: 16px;
@@ -67,27 +63,19 @@
             margin-top: 10px;
         }
 
-        /* Overlay styles */
+        /* Canvas for Erasable Overlay */
         #erasable-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            pointer-events: auto; /* Allow interaction */
-        }
-
-        #black-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 300px; /* Match password popup width */
-            height: 300px; /* Match password popup height */
-            background-color: black;
-            z-index: 10; /* Above the password popup */
+            width: 100%; /* Match width of the password popup */
+            height: 100%; /* Match height of the password popup */
+            pointer-events: auto; /* Ensure it captures events */
         }
     </style>
 </head>
-
 <body>
+
     <!-- Password Overlay -->
     <div id="password-overlay">
         <div id="password-popup">
@@ -95,8 +83,6 @@
             <input type="password" id="password-input" placeholder="&#128373Password?">
             <button id="password-submit">Submit</button>
 
-            <!-- Black overlay -->
-            <div id="black-overlay"></div>
             <!-- Erasable overlay -->
             <canvas id="erasable-overlay"></canvas>
         </div>
@@ -105,12 +91,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const passwordOverlay = document.getElementById('password-overlay');
-            const passwordPopup = document.getElementById('password-popup');
             const passwordInput = document.getElementById('password-input');
             const passwordSubmit = document.getElementById('password-submit');
-            const blackOverlay = document.getElementById('black-overlay');
-            const canvas = document.getElementById('erasable-overlay');
-            const ctx = canvas.getContext('2d');
             const correctPassword = "w";
 
             function checkPassword() {
@@ -130,12 +112,14 @@
                 }
             });
 
-            // Set canvas size to match the password popup
-            canvas.width = passwordPopup.clientWidth;
-            canvas.height = passwordPopup.clientHeight;
+            // Erasable overlay effect setup
+            const canvas = document.getElementById('erasable-overlay');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 300; // Match width of the password popup
+            canvas.height = 200; // Match height of the password popup
 
             // Draw initial overlay
-            ctx.fillStyle = 'black'; // Change erased background colour to black
+            ctx.fillStyle = 'black'; // Set to black for the background
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let isDrawing = false;
@@ -146,34 +130,18 @@
             function updateErasureProgress() {
                 const overallErasedPercentage = (erasedPixels / (totalPixels / 4)) * 100;
 
-                // Allow interaction with password popup after 50% erased
+                // Check if grey overlay is 50% erased
                 if (overallErasedPercentage >= 50) {
-                    blackOverlay.style.display = 'none'; // Hide both black overlays
+                    // Remove both black overlays
+                    passwordOverlay.style.backgroundColor = 'transparent'; // Optionally, adjust the overlay
                     canvas.style.pointerEvents = 'none'; // Allow interaction with password popup
                 }
             }
 
-            // Handle erasure logic
-            function erase(x, y) {
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, eraserSize / 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                const erasedData = ctx.getImageData(x - eraserSize / 2, y - eraserSize / 2, eraserSize, eraserSize).data;
-                let count = 0;
-
-                for (let i = 3; i < erasedData.length; i += 4) {
-                    if (erasedData[i] === 0) count++; // Fully transparent pixels
-                }
-
-                erasedPixels += count;
-                updateErasureProgress();
-            }
-
-            canvas.addEventListener('mousedown', (e) => {
+            // Eraser logic
+            canvas.addEventListener('mousedown', () => {
                 isDrawing = true;
-                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+                ctx.globalCompositeOperation = 'destination-out';
             });
 
             canvas.addEventListener('mouseup', () => {
@@ -183,14 +151,34 @@
 
             canvas.addEventListener('mousemove', (e) => {
                 if (!isDrawing) return;
-                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                ctx.beginPath();
+                ctx.arc(x, y, eraserSize / 2, 0, 2 * Math.PI);
+                ctx.fill();
+
+                erasedPixels += Math.PI * Math.pow(eraserSize / 2, 2);
+                updateErasureProgress();
             });
 
-            // Allow erasing on canvas click
+            // Click event for erasing
             canvas.addEventListener('click', (e) => {
-                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                ctx.beginPath();
+                ctx.arc(x, y, eraserSize / 2, 0, 2 * Math.PI);
+                ctx.fill();
+
+                erasedPixels += Math.PI * Math.pow(eraserSize / 2, 2);
+                updateErasureProgress();
             });
         });
     </script>
+
 </body>
 </html>
