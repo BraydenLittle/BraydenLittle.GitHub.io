@@ -66,9 +66,7 @@
             outline: none;
             margin-top: 10px;
         }
-    </style>
 
-    <style>
         /* Canvas for Erasable Overlay */
         #erasable-overlay {
             position: fixed;
@@ -127,7 +125,7 @@
             canvas.height = window.innerHeight;
 
             // Draw initial overlay
-            ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
+            ctx.fillStyle = 'black'; // Change erased background colour to black
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let isDrawing = false;
@@ -146,8 +144,8 @@
                 erasedPixels += count;
                 const overallErasedPercentage = (erasedPixels / (totalPixels / 4)) * 100;
 
-                // Check if grey overlay is 50% erased
-                if (overallErasedPercentage >= 30) {
+                // Allow interaction with password popup after 50% erased
+                if (overallErasedPercentage >= 50) {
                     canvas.style.pointerEvents = 'none'; // Allow interaction with password popup
                 }
             }
