@@ -145,7 +145,7 @@
                 const overallErasedPercentage = (erasedPixels / (totalPixels / 4)) * 100;
 
                 // Allow interaction with password popup after 50% erased
-                if (overallErasedPercentage >= 50) {
+                if (overallErasedPercentage >= 100) {
                     canvas.style.pointerEvents = 'none'; // Allow interaction with password popup
                 }
             }
