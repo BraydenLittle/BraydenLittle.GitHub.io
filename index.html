@@ -67,15 +67,22 @@
             margin-top: 10px;
         }
 
-        /* Canvas for Erasable Overlay */
+        /* Overlay styles */
         #erasable-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(200, 200, 200, 0.9);
-            pointer-events: auto;
+            pointer-events: auto; /* Allow interaction */
+        }
+
+        #black-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px; /* Match password popup width */
+            height: 300px; /* Match password popup height */
+            background-color: black;
+            z-index: 10; /* Above the password popup */
         }
     </style>
 </head>
@@ -88,6 +95,8 @@
             <input type="password" id="password-input" placeholder="&#128373Password?">
             <button id="password-submit">Submit</button>
 
+            <!-- Black overlay -->
+            <div id="black-overlay"></div>
             <!-- Erasable overlay -->
             <canvas id="erasable-overlay"></canvas>
         </div>
@@ -99,6 +108,9 @@
             const passwordPopup = document.getElementById('password-popup');
             const passwordInput = document.getElementById('password-input');
             const passwordSubmit = document.getElementById('password-submit');
+            const blackOverlay = document.getElementById('black-overlay');
+            const canvas = document.getElementById('erasable-overlay');
+            const ctx = canvas.getContext('2d');
             const correctPassword = "w";
 
             function checkPassword() {
@@ -118,11 +130,9 @@
                 }
             });
 
-            // Erasable overlay effect setup
-            const canvas = document.getElementById('erasable-overlay');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Set canvas size to match the password popup
+            canvas.width = passwordPopup.clientWidth;
+            canvas.height = passwordPopup.clientHeight;
 
             // Draw initial overlay
             ctx.fillStyle = 'black'; // Change erased background colour to black
@@ -133,28 +143,37 @@
             let erasedPixels = 0;
             const totalPixels = canvas.width * canvas.height;
 
-            function updateErasureProgress(x, y) {
+            function updateErasureProgress() {
+                const overallErasedPercentage = (erasedPixels / (totalPixels / 4)) * 100;
+
+                // Allow interaction with password popup after 50% erased
+                if (overallErasedPercentage >= 50) {
+                    blackOverlay.style.display = 'none'; // Hide both black overlays
+                    canvas.style.pointerEvents = 'none'; // Allow interaction with password popup
+                }
+            }
+
+            // Handle erasure logic
+            function erase(x, y) {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, eraserSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+                
                 const erasedData = ctx.getImageData(x - eraserSize / 2, y - eraserSize / 2, eraserSize, eraserSize).data;
                 let count = 0;
 
                 for (let i = 3; i < erasedData.length; i += 4) {
                     if (erasedData[i] === 0) count++; // Fully transparent pixels
                 }
-                
-                erasedPixels += count;
-                const overallErasedPercentage = (erasedPixels / (totalPixels / 4)) * 100;
 
-                // Allow interaction with password popup after 50% erased
-                if (overallErasedPercentage >= 100) {
-                    canvas.style.pointerEvents = 'none'; // Allow interaction with password popup
-                }
+                erasedPixels += count;
+                updateErasureProgress();
             }
 
-            canvas.addEventListener('mousedown', () => {
+            canvas.addEventListener('mousedown', (e) => {
                 isDrawing = true;
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.lineWidth = eraserSize;
-                ctx.lineCap = 'round';
+                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
             });
 
             canvas.addEventListener('mouseup', () => {
@@ -164,16 +183,12 @@
 
             canvas.addEventListener('mousemove', (e) => {
                 if (!isDrawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y);
+                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+            });
 
-                updateErasureProgress(x, y);
+            // Allow erasing on canvas click
+            canvas.addEventListener('click', (e) => {
+                erase(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
             });
         });
     </script>
