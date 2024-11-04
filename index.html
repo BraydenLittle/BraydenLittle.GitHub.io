@@ -78,22 +78,26 @@
         pointer-events: auto; /* Allow mouse events */
     }
 
-        #erasable-overlay-text {
-            font-family: monospace;
-            font-size: 3em;
-            color: #666;
-            text-align: center;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            white-space: pre;
-        }
-
     </style>
 </head>
 <body>
 
+    <!-- Updated Styles -->
+<style>
+    /* Canvas for Erasable Overlay */
+    #erasable-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(200, 200, 200, 0.9);
+        pointer-events: auto;
+    }
+</style>
+
+<!-- HTML -->
+<body>
     <!-- Password Overlay -->
     <div id="password-overlay">
         <div id="password-popup">
@@ -101,16 +105,8 @@
             <input type="password" id="password-input" placeholder="&#128373Password?">
             <button id="password-submit">Submit</button>
 
-            <!-- Erasable overlay with question mark -->
+            <!-- Erasable overlay -->
             <canvas id="erasable-overlay"></canvas>
-            <div id="erasable-overlay-text">
-                ###
-                # #
-                 #
-                 #
-                 #
-                ###
-            </div>
         </div>
     </div>
 
@@ -133,7 +129,6 @@
             }
 
             passwordSubmit.addEventListener('click', checkPassword);
-
             passwordInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     checkPassword();
@@ -141,27 +136,43 @@
             });
 
             // Erasable overlay effect setup
-             const canvas = document.getElementById('erasable-overlay');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; // Full viewport width
-        canvas.height = window.innerHeight; // Full viewport height
+            const canvas = document.getElementById('erasable-overlay');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
-        // Draw initial overlay
-        ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw initial overlay
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Eraser effect
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(x, y, 30, 0, 2 * Math.PI);
-            ctx.fill();
+            // Eraser effect with larger, smoother strokes
+            let isDrawing = false;
+            const eraserSize = 90; // Three times original size
+
+            canvas.addEventListener('mousedown', () => {
+                isDrawing = true;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = eraserSize;
+                ctx.lineCap = 'round';
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+                ctx.beginPath(); // Reset path after mouse up to prevent line joining
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath(); // Start a new path at the end of each stroke for smoother lines
+                ctx.moveTo(x, y);
+            });
         });
-    });
     </script>
-
 </body>
+
 </html>
