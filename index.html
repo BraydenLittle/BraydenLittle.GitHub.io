@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brayden Little</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            overflow: hidden;
+        }
+
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #password-popup {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            padding: 20px;
+            background-color: rgb(30, 30, 30);
+            color: white;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        #password-input, #password-submit {
+            padding: 10px;
+            width: 80%;
+            margin-top: 10px;
+            background-color: black;
+            border: 2px solid white;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        #erasable-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(30, 30, 30);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<div id="password-overlay">
+    <div id="password-popup">
+        <h2>&#128679; Under Construction &#128679;</h2>
+        <input type="password" id="password-input" placeholder="&#128373; Password?" />
+        <button id="password-submit">Submit</button>
+        <canvas id="erasable-overlay"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const passwordOverlay = document.getElementById('password-overlay');
+    const passwordInput = document.getElementById('password-input');
+    const passwordSubmit = document.getElementById('password-submit');
+    const canvas = document.getElementById('erasable-overlay');
+    const ctx = canvas.getContext('2d');
+    const correctPassword = "w";
+
+    function checkPassword() {
+        if (passwordInput.value === correctPassword) {
+            window.location.href = "/home.html";
+        } else {
+            alert('No peeking!');
+            passwordInput.value = '';
+        }
+    }
+
+    passwordSubmit.addEventListener('click', checkPassword);
+    passwordInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            checkPassword();
+        }
+    });
+
+    canvas.width = 300;
+    canvas.height = 200;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let isDrawing = false;
+    const eraserSize = 40;
+    let erasedPixels = 0;
+    const totalPixels = canvas.width * canvas.height;
+
+    function updateErasureProgress() {
+        const erasedPercentage = (erasedPixels / totalPixels) * 100;
+        if (erasedPercentage >= 100) {
+            canvas.style.display = 'none';
+        }
+    }
+
+    canvas.addEventListener('mousedown', () => {
+        isDrawing = true;
+        ctx.globalCompositeOperation = 'destination-out';
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+        ctx.beginPath();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ctx.beginPath();
+        ctx.arc(x, y, eraserSize / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        erasedPixels += Math.PI * Math.pow(eraserSize / 2, 2);
+        updateErasureProgress();
+    });
+});
+</script>
+
+</body>
+</html>
